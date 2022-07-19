@@ -1,9 +1,7 @@
-import React from "react";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { DoubleSide } from "three";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
-
 import * as THREE from "three";
 
 function PlaneMove(props) {
@@ -11,7 +9,8 @@ function PlaneMove(props) {
   const plane = useRef();
   const pointer = new THREE.Vector2();
   const { camera, raycaster, scene } = useThree();
-
+  const stayPosition = new THREE.Vector3(0, -500, 0);
+  let factorScale = 1;
   let circlePointerMove = {};
 
   function onPointerMove(event) {
@@ -30,27 +29,58 @@ function PlaneMove(props) {
     };
   }
 
-  useFrame(() => {
-    if (circlePointerMove.z >= 49 || circlePointerMove.z <= -49) {
+  useFrame((e) => {
+    if (circlePointerMove.z >= 480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y,
-        circlePointerMove.z
+        circlePointerMove.z - 50
       );
-      plane.current.rotation.set(0, 0, 0);
-    } else if (circlePointerMove.x >= 49 || circlePointerMove.x <= -49) {
+      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      plane.current.scale.set(factorScale, factorScale, factorScale);
+      plane.current.rotation.set(-Math.PI / 2, 0, 0);
+    } else if (circlePointerMove.z <= -480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y,
-        circlePointerMove.z
+        circlePointerMove.z + 50
       );
-      plane.current.rotation.set(0, Math.PI / 2, 0);
-    } else if (circlePointerMove.y >= 49 || circlePointerMove.y <= -49) {
+      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      plane.current.scale.set(factorScale, factorScale, factorScale);
+      plane.current.rotation.set(-Math.PI / 2, 0, 0);
+    } else if (circlePointerMove.x <= -480) {
       plane.current.position.set(
-        circlePointerMove.x,
+        circlePointerMove.x + 50,
         circlePointerMove.y,
         circlePointerMove.z
       );
+      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      plane.current.scale.set(factorScale, factorScale, factorScale);
+      plane.current.rotation.set(Math.PI / 2, 0, 0);
+    } else if (circlePointerMove.x >= 480) {
+      plane.current.position.set(
+        circlePointerMove.x - 50,
+        circlePointerMove.y,
+        circlePointerMove.z
+      );
+      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      plane.current.scale.set(factorScale, factorScale, factorScale);
+      plane.current.rotation.set(Math.PI / 2, 0, 0);
+    } else if (circlePointerMove.y <= -480) {
+      plane.current.position.set(
+        circlePointerMove.x,
+        circlePointerMove.y + 1,
+        circlePointerMove.z
+      );
+      plane.current.scale.set(1, 1, 1);
+      plane.current.rotation.set(Math.PI / 2, 0, 0);
+    } else if (circlePointerMove.y >= 480) {
+      plane.current.position.set(
+        circlePointerMove.x,
+        circlePointerMove.y - 1,
+        circlePointerMove.z
+      );
+      plane.current.scale.set(1, 1, 1);
       plane.current.rotation.set(Math.PI / 2, 0, 0);
     } else plane.current.rotation.set(0, 0, 0);
   });
@@ -58,13 +88,13 @@ function PlaneMove(props) {
   window.addEventListener("mousemove", onPointerMove);
 
   return (
-    <mesh ref={plane} rotation={[0, 0, 0]} position={[0, 0, -50]} scale={1}>
-      <planeBufferGeometry attach="geometry" args={[10, 10, 10]} />
+    <mesh ref={plane} rotation={[Math.PI / 2, 0, 0]} position={[0, -499, 0]}>
+      <planeBufferGeometry attach="geometry" args={[100, 100, 100]} />
       <meshBasicMaterial
         attach="material"
         map={circleMove}
-        transparent
         side={DoubleSide}
+        transparent
       />
     </mesh>
   );

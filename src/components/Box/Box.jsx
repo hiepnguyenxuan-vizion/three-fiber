@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { BackSide, Vector3 } from "three";
-import { useLoader } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import PlaneFixed from "../PlaneFixed/PlaneFixed";
 import PlaneMove from "../PlaneMove/PlaneMove";
@@ -9,7 +9,9 @@ function Box(props) {
   const { images, hotspots } = props.data;
   const mesh = useRef();
   const textures = useLoader(TextureLoader, images);
+  let pointerMove = false;
   let vectorsArr = [];
+  let stateCameraArr = [];
   hotspots.forEach((item) => {
     const vector = new Vector3(
       item.hotspot[0],
@@ -21,17 +23,38 @@ function Box(props) {
 
   const handleMoving = (e) => {
     e.stopPropagation();
-    // let indexMove;
-    // let dMin;
+    if (!pointerMove) return;
 
-    // for (let i = 0; i < vectorsArr.length - 1; i++) {
-    //   const d1 = e.point.distanceTo(vectorsArr[i]);
-    //   const d2 = e.point.distanceTo(vectorsArr[i + 1]);
-    //   if (d1 < d2) {
-    //     indexMove = i;
-    //   }
-    // }
+    let indexMove;
+    let dMin;
+
+    for (let i = 0; i < vectorsArr.length - 1; i++) {
+      const d1 = e.point.distanceTo(vectorsArr[i]);
+      const d2 = e.point.distanceTo(vectorsArr[i + 1]);
+      if (d1 <= d2) {
+        dMin = d1;
+        indexMove = i;
+      } else {
+        dMin = d2;
+        indexMove = i + 1;
+      }
+    }
+
+    props.setShowBoxIndex(hotspots[indexMove].boxID);
   };
+
+  useFrame((e) => {
+    const stateCamera = Math.round(
+      Math.abs(e.camera.rotation._x) +
+        Math.abs(e.camera.rotation._y) +
+        Math.abs(e.camera.rotation._z)
+    );
+    stateCameraArr.push(stateCamera);
+    const prevState = stateCameraArr[stateCameraArr.length - 20];
+    const nextState = stateCameraArr[stateCameraArr.length - 1];
+    pointerMove = prevState === nextState;
+    console.log(stateCamera);
+  });
 
   return (
     <mesh
@@ -41,7 +64,7 @@ function Box(props) {
       rotation={[0, 0, 0]}
       scale={1}
     >
-      <boxBufferGeometry attach="geometry" args={[100, 100, 100]} />
+      <boxBufferGeometry attach="geometry" args={[1000, 1000, 1000]} />
 
       {textures.map((item, index) => (
         <meshPhongMaterial
