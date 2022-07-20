@@ -19,6 +19,8 @@ import img16 from "../../images/box3/ny_3.jpg";
 import img17 from "../../images/box3/pz_3.jpg";
 import img18 from "../../images/box3/nz_3.jpg";
 
+import { degToRad } from "three/src/math/MathUtils";
+
 const fakeData = [
   {
     id: 1,
@@ -30,12 +32,14 @@ const fakeData = [
         hotspot: [0, -49, 0],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 1,
+        defaultRotation: [0, degToRad(135), 0],
       },
       {
         boxID: 2,
         hotspot: [450, -200, 422],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 5,
+        defaultRotation: [0, degToRad(90), 0],
       },
     ],
   },
@@ -49,12 +53,14 @@ const fakeData = [
         hotspot: [-450, -193, -196],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 6,
+        defaultRotation: [0, degToRad(45), 0],
       },
       {
         boxID: 3,
         hotspot: [450, -190, 28],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 6,
+        defaultRotation: [0, degToRad(180), 0],
       },
     ],
   },
@@ -68,12 +74,14 @@ const fakeData = [
         hotspot: [-450, -162, -170],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 5,
+        defaultRotation: [0, degToRad(45), 0],
       },
       {
         boxID: 1,
         hotspot: [450, -162, -263],
         rotation: [-Math.PI / 2, 0, 0],
         scale: 5,
+        defaultRotation: [0, degToRad(180), 0],
       },
     ],
   },

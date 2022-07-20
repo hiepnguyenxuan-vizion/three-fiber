@@ -1,4 +1,4 @@
-import React, { memo, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { DoubleSide } from "three";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
@@ -8,10 +8,11 @@ function PlaneMove(props) {
   const circleMove = useLoader(TextureLoader, "./images/circleMove.png");
   const plane = useRef();
   const pointer = new THREE.Vector2();
-  const { camera, raycaster, scene } = useThree();
+  const { camera, raycaster, scene, viewport } = useThree();
   const stayPosition = new THREE.Vector3(0, -500, 0);
   let factorScale = 1;
   let circlePointerMove = {};
+  let isResponsive = useRef(false);
 
   function onPointerMove(event) {
     event.preventDefault();
@@ -30,6 +31,7 @@ function PlaneMove(props) {
   }
 
   useFrame((e) => {
+    if (isResponsive.current) return;
     if (circlePointerMove.z >= 480) {
       plane.current.position.set(
         circlePointerMove.x,
@@ -84,6 +86,16 @@ function PlaneMove(props) {
       plane.current.rotation.set(Math.PI / 2, 0, 0);
     } else plane.current.rotation.set(0, 0, 0);
   });
+
+  useEffect(() => {
+    (function responsivePlaneMove() {
+      const responsiveWidth = viewport.factor * viewport.width;
+      if (responsiveWidth < 768) {
+        isResponsive.current = true;
+        plane.current.scale.set(0, 0, 0);
+      }
+    })();
+  }, [viewport.factor, viewport.width]);
 
   window.addEventListener("mousemove", onPointerMove);
 

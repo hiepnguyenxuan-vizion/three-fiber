@@ -5,6 +5,7 @@ import Box from "./components/Box/Box";
 import fakeData from "./assets/fakeData/data";
 
 import "./App.css";
+import { degToRad } from "three/src/math/MathUtils";
 
 function App() {
   const [showBoxIndex, setShowBoxIndex] = useState(1);
@@ -14,8 +15,8 @@ function App() {
       <Canvas className="canvas">
         <ambientLight intensity={0.5} />
 
-        <OrbitControls enableZoom={false} />
-        <PerspectiveCamera position={[0, 0, 0]} />
+        <OrbitControls enableZoom={false} rotation={[0, degToRad(135), 0]} />
+        <PerspectiveCamera />
 
         <Suspense fallback={null}>
           <Box

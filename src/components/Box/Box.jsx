@@ -1,15 +1,17 @@
-import React, { memo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useRef } from "react";
 import { BackSide, Vector3 } from "three";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import PlaneFixed from "../PlaneFixed/PlaneFixed";
 import PlaneMove from "../PlaneMove/PlaneMove";
+import { degToRad } from "three/src/math/MathUtils";
 
 function Box(props) {
   const { images, hotspots } = props.data;
   const mesh = useRef();
   const textures = useLoader(TextureLoader, images);
   let pointerMove = false;
+  // let activeRotation = useRef([0, degToRad(135), 0]);
   let vectorsArr = [];
   let stateCameraArr = [];
   hotspots.forEach((item) => {
@@ -21,27 +23,32 @@ function Box(props) {
     vectorsArr.push(vector);
   });
 
-  const handleMoving = (e) => {
-    e.stopPropagation();
-    if (!pointerMove) return;
+  const handleMoving = useCallback(
+    (e) => {
+      e.stopPropagation();
 
-    let indexMove;
-    let dMin;
+      if (!pointerMove) return;
 
-    for (let i = 0; i < vectorsArr.length - 1; i++) {
-      const d1 = e.point.distanceTo(vectorsArr[i]);
-      const d2 = e.point.distanceTo(vectorsArr[i + 1]);
-      if (d1 <= d2) {
-        dMin = d1;
-        indexMove = i;
-      } else {
-        dMin = d2;
-        indexMove = i + 1;
+      let indexMove;
+      let dMin;
+
+      for (let i = 0; i < vectorsArr.length - 1; i++) {
+        const d1 = e.point.distanceTo(vectorsArr[i]);
+        const d2 = e.point.distanceTo(vectorsArr[i + 1]);
+        if (d1 <= d2) {
+          dMin = d1;
+          indexMove = i;
+        } else {
+          dMin = d2;
+          indexMove = i + 1;
+        }
       }
-    }
 
-    props.setShowBoxIndex(hotspots[indexMove].boxID);
-  };
+      props.setShowBoxIndex(hotspots[indexMove].boxID);
+      // activeRotation.current = hotspots[indexMove].defaultRotation;
+    },
+    [hotspots, pointerMove, props]
+  );
 
   useFrame((e) => {
     const stateCamera = Math.round(
@@ -51,11 +58,9 @@ function Box(props) {
         10
     );
     stateCameraArr.push(stateCamera);
-    const prevState = stateCameraArr[stateCameraArr.length - 20];
+    const prevState = stateCameraArr[stateCameraArr.length - 35];
     const nextState = stateCameraArr[stateCameraArr.length - 1];
     pointerMove = prevState === nextState;
-
-    console.log(e.camera.rotation);
   });
 
   return (
