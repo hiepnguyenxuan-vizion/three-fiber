@@ -2,7 +2,6 @@ import React, { Suspense, useState } from "react";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import Box from "./components/Box/Box";
-
 import fakeData from "./assets/fakeData/data";
 
 import "./App.css";
@@ -13,7 +12,7 @@ function App() {
   return (
     <div className="App">
       <Canvas className="canvas">
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={0.5} />
 
         <OrbitControls enableZoom={false} />
         <PerspectiveCamera position={[0, 0, 0]} />

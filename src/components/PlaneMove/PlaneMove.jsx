@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { memo, useRef } from "react";
 import { DoubleSide } from "three";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
@@ -100,4 +100,4 @@ function PlaneMove(props) {
   );
 }
 
-export default PlaneMove;
+export default memo(PlaneMove);

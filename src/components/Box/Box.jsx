@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { memo, useRef } from "react";
 import { BackSide, Vector3 } from "three";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
@@ -45,21 +45,24 @@ function Box(props) {
 
   useFrame((e) => {
     const stateCamera = Math.round(
-      Math.abs(e.camera.rotation._x) +
+      (Math.abs(e.camera.rotation._x) +
         Math.abs(e.camera.rotation._y) +
-        Math.abs(e.camera.rotation._z)
+        Math.abs(e.camera.rotation._z)) *
+        10
     );
     stateCameraArr.push(stateCamera);
     const prevState = stateCameraArr[stateCameraArr.length - 20];
     const nextState = stateCameraArr[stateCameraArr.length - 1];
     pointerMove = prevState === nextState;
-    console.log(stateCamera);
+
+    console.log(e.camera.rotation);
   });
 
   return (
     <mesh
       ref={mesh}
       onClick={(e) => handleMoving(e)}
+      onPointerMove={() => (pointerMove = false)}
       position={[0, 0, 0]}
       rotation={[0, 0, 0]}
       scale={1}
@@ -88,4 +91,4 @@ function Box(props) {
   );
 }
 
-export default Box;
+export default memo(Box);

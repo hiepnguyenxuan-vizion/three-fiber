@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { DoubleSide } from "three";
 import { useLoader } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
@@ -26,4 +26,4 @@ function PlaneFixed(props) {
   );
 }
 
-export default PlaneFixed;
+export default memo(PlaneFixed);
