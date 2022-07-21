@@ -78,13 +78,13 @@ function Box(props) {
       mouseDown = setInterval(() => {
         timer = ++countTimer;
         return (pointerMove.current = false);
-      }, 25);
+      }, 10);
     };
 
     const handleMouseUp = (e) => {
       e.stopPropagation();
       clearInterval(mouseDown);
-      if (timer < 2) return (pointerMove.current = true);
+      if (timer < 1) return (pointerMove.current = true);
       else return (pointerMove.current = false);
     };
 
