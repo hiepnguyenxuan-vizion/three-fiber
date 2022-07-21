@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useRef } from "react";
 import { DoubleSide } from "three";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import * as THREE from "three";
 
@@ -8,7 +8,7 @@ function PlaneMove(props) {
   const circleMove = useLoader(TextureLoader, "./images/circleMove.png");
   const plane = useRef();
   const pointer = new THREE.Vector2();
-  const { camera, raycaster, scene, viewport } = useThree();
+  const { camera, raycaster, scene, size } = useThree();
   const stayPosition = new THREE.Vector3(0, -500, 0);
   let factorScale = 1;
   let circlePointerMove = {};
@@ -28,11 +28,11 @@ function PlaneMove(props) {
       y: intersects[0].point.y,
       z: intersects[0].point.z,
     };
-  }
 
-  useFrame((e) => {
+    // console.log(circlePointerMove);
+
     if (isResponsive.current) return;
-    if (circlePointerMove.z >= 480) {
+    if (plane.current && circlePointerMove.z >= 480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y,
@@ -41,7 +41,7 @@ function PlaneMove(props) {
       factorScale = 400 / stayPosition.distanceTo(plane.current.position);
       plane.current.scale.set(factorScale, factorScale, factorScale);
       plane.current.rotation.set(-Math.PI / 2, 0, 0);
-    } else if (circlePointerMove.z <= -480) {
+    } else if (plane.current && circlePointerMove.z <= -480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y,
@@ -50,7 +50,7 @@ function PlaneMove(props) {
       factorScale = 400 / stayPosition.distanceTo(plane.current.position);
       plane.current.scale.set(factorScale, factorScale, factorScale);
       plane.current.rotation.set(-Math.PI / 2, 0, 0);
-    } else if (circlePointerMove.x <= -480) {
+    } else if (plane.current && circlePointerMove.x <= -480) {
       plane.current.position.set(
         circlePointerMove.x + 50,
         circlePointerMove.y,
@@ -59,7 +59,7 @@ function PlaneMove(props) {
       factorScale = 400 / stayPosition.distanceTo(plane.current.position);
       plane.current.scale.set(factorScale, factorScale, factorScale);
       plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (circlePointerMove.x >= 480) {
+    } else if (plane.current && circlePointerMove.x >= 480) {
       plane.current.position.set(
         circlePointerMove.x - 50,
         circlePointerMove.y,
@@ -68,7 +68,7 @@ function PlaneMove(props) {
       factorScale = 400 / stayPosition.distanceTo(plane.current.position);
       plane.current.scale.set(factorScale, factorScale, factorScale);
       plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (circlePointerMove.y <= -480) {
+    } else if (plane.current && circlePointerMove.y <= -480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y + 1,
@@ -76,7 +76,7 @@ function PlaneMove(props) {
       );
       plane.current.scale.set(1, 1, 1);
       plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (circlePointerMove.y >= 480) {
+    } else if (plane.current && circlePointerMove.y >= 480) {
       plane.current.position.set(
         circlePointerMove.x,
         circlePointerMove.y - 1,
@@ -84,18 +84,17 @@ function PlaneMove(props) {
       );
       plane.current.scale.set(1, 1, 1);
       plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else plane.current.rotation.set(0, 0, 0);
-  });
+    }
+  }
 
   useEffect(() => {
     (function responsivePlaneMove() {
-      const responsiveWidth = viewport.factor * viewport.width;
-      if (responsiveWidth < 768) {
+      if (size.width < 768) {
         isResponsive.current = true;
         plane.current.scale.set(0, 0, 0);
       }
     })();
-  }, [viewport.factor, viewport.width]);
+  }, [size.width]);
 
   window.addEventListener("mousemove", onPointerMove);
 

@@ -10,8 +10,8 @@ function Box(props) {
   const { images, hotspots } = props.data;
   const mesh = useRef();
   const textures = useLoader(TextureLoader, images);
-  let pointerMove = false;
-  // let activeRotation = useRef([0, degToRad(135), 0]);
+  let pointerMove = useRef(false);
+  let activeRotation = useRef([0, 0, 0]);
   let vectorsArr = [];
   let stateCameraArr = [];
   hotspots.forEach((item) => {
@@ -23,11 +23,10 @@ function Box(props) {
     vectorsArr.push(vector);
   });
 
-  const handleMoving = useCallback(
+  const handleClick = useCallback(
     (e) => {
       e.stopPropagation();
-
-      if (!pointerMove) return;
+      if (!pointerMove.current) return;
 
       let indexMove;
       let dMin;
@@ -45,34 +44,71 @@ function Box(props) {
       }
 
       props.setShowBoxIndex(hotspots[indexMove].boxID);
-      // activeRotation.current = hotspots[indexMove].defaultRotation;
+      activeRotation.current = hotspots[indexMove].defaultRotation;
+      // console.log(activeRotation.current);
     },
-    [hotspots, pointerMove, props]
+    [hotspots, pointerMove.current, props, vectorsArr]
   );
 
-  useFrame((e) => {
-    const stateCamera = Math.round(
-      (Math.abs(e.camera.rotation._x) +
-        Math.abs(e.camera.rotation._y) +
-        Math.abs(e.camera.rotation._z)) *
-        10
-    );
-    stateCameraArr.push(stateCamera);
-    const prevState = stateCameraArr[stateCameraArr.length - 35];
-    const nextState = stateCameraArr[stateCameraArr.length - 1];
-    pointerMove = prevState === nextState;
-  });
+  // useFrame((e) => {
+  //   console.log(e);
+  //   const stateCamera = Math.round(
+  //     (Math.abs(e.camera.rotation._x) +
+  //       Math.abs(e.camera.rotation._y) +
+  //       Math.abs(e.camera.rotation._z)) *
+  //       10
+  //   );
+  //   stateCameraArr.push(stateCamera);
+  //   const prevState = stateCameraArr[stateCameraArr.length - 5];
+  //   const nextState = stateCameraArr[stateCameraArr.length - 1];
+  //   console.log(prevState === nextState);
+  //   if (prevState === nextState) pointerMove.current = true;
+  // });
+
+  const handleMouseMove = (e) => {
+    e.stopPropagation();
+  };
+
+  useEffect(() => {
+    let timer = 0;
+    let mouseDown;
+    const handleMouseDown = (e) => {
+      e.stopPropagation();
+      let countTimer = 0;
+      mouseDown = setInterval(() => {
+        timer = ++countTimer;
+        return (pointerMove.current = false);
+      }, 50);
+    };
+
+    const handleMouseUp = (e) => {
+      e.stopPropagation();
+      clearInterval(mouseDown);
+      if (timer < 2) return (pointerMove.current = true);
+      else return (pointerMove.current = false);
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
   return (
     <mesh
       ref={mesh}
-      onClick={(e) => handleMoving(e)}
-      onPointerMove={() => (pointerMove = false)}
+      onClick={(e) => handleClick(e)}
+      onPointerMove={(e) => handleMouseMove(e)}
       position={[0, 0, 0]}
       rotation={[0, 0, 0]}
       scale={1}
     >
       <boxBufferGeometry attach="geometry" args={[1000, 1000, 1000]} />
+
+      {/* <meshNormalMaterial side={BackSide} /> */}
 
       {textures.map((item, index) => (
         <meshPhongMaterial

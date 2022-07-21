@@ -15,7 +15,7 @@ function App() {
       <Canvas className="canvas">
         <ambientLight intensity={0.5} />
 
-        <OrbitControls enableZoom={false} rotation={[0, degToRad(135), 0]} />
+        <OrbitControls enableZoom={false} />
         <PerspectiveCamera />
 
         <Suspense fallback={null}>
