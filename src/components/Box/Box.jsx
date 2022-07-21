@@ -78,7 +78,7 @@ function Box(props) {
       mouseDown = setInterval(() => {
         timer = ++countTimer;
         return (pointerMove.current = false);
-      }, 50);
+      }, 25);
     };
 
     const handleMouseUp = (e) => {
