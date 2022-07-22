@@ -1,19 +1,23 @@
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import { BackSide, Vector3 } from "three";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useLoader, useThree } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import PlaneFixed from "../PlaneFixed/PlaneFixed";
 import PlaneMove from "../PlaneMove/PlaneMove";
 import { degToRad } from "three/src/math/MathUtils";
+import * as THREE from "three";
 
 function Box(props) {
   const { images, hotspots } = props.data;
   const mesh = useRef();
+  const controlsRef = useRef();
   const textures = useLoader(TextureLoader, images);
+  const { camera } = useThree();
   let pointerMove = useRef(false);
-  let activeRotation = useRef([0, 0, 0]);
+  let activeRotation = useRef();
   let vectorsArr = [];
-  let stateCameraArr = [];
+
   hotspots.forEach((item) => {
     const vector = new Vector3(
       item.hotspot[0],
@@ -45,29 +49,28 @@ function Box(props) {
 
       props.setShowBoxIndex(hotspots[indexMove].boxID);
       activeRotation.current = hotspots[indexMove].defaultRotation;
-      // console.log(activeRotation.current);
+
+      handleCameraRotation(
+        activeRotation.current[0],
+        activeRotation.current[1],
+        activeRotation.current[2]
+      );
     },
     [hotspots, pointerMove.current, props, vectorsArr]
   );
 
-  // useFrame((e) => {
-  //   console.log(e);
-  //   const stateCamera = Math.round(
-  //     (Math.abs(e.camera.rotation._x) +
-  //       Math.abs(e.camera.rotation._y) +
-  //       Math.abs(e.camera.rotation._z)) *
-  //       10
-  //   );
-  //   stateCameraArr.push(stateCamera);
-  //   const prevState = stateCameraArr[stateCameraArr.length - 5];
-  //   const nextState = stateCameraArr[stateCameraArr.length - 1];
-  //   console.log(prevState === nextState);
-  //   if (prevState === nextState) pointerMove.current = true;
-  // });
-
-  const handleMouseMove = (e) => {
-    e.stopPropagation();
+  const handleCameraRotation = (x = 0, y = degToRad(-135), z = 0) => {
+    const direction = new THREE.Vector3();
+    camera.rotation.set(x, y, z);
+    camera.getWorldDirection(direction);
+    camera.getWorldPosition(controlsRef.current.target);
+    controlsRef.current.target.addScaledVector(direction, 1);
+    controlsRef.current.update();
   };
+
+  useEffect(() => {
+    handleCameraRotation();
+  }, []);
 
   useEffect(() => {
     let timer = 0;
@@ -83,7 +86,7 @@ function Box(props) {
 
     const handleMouseUp = (e) => {
       e.stopPropagation();
-      console.log("mouseUp", timer);
+      // console.log("mouseUp", timer);
       clearInterval(mouseDown);
       if (timer < 6) return (pointerMove.current = true);
       else return (pointerMove.current = false);
@@ -99,37 +102,49 @@ function Box(props) {
   }, []);
 
   return (
-    <mesh
-      ref={mesh}
-      onClick={(e) => handleClick(e)}
-      onPointerMove={(e) => handleMouseMove(e)}
-      position={[0, 0, 0]}
-      rotation={[0, 0, 0]}
-      scale={1}
-    >
-      <boxBufferGeometry attach="geometry" args={[1000, 1000, 1000]} />
+    <>
+      <PerspectiveCamera />
+      <OrbitControls ref={controlsRef} enableZoom={false} enableRotate={true} />
+      <mesh>
+        <boxBufferGeometry attach="geometry" args={[1100, 1100, 1100]} />
 
-      {/* <meshNormalMaterial side={BackSide} /> */}
+        {textures.map((item, index) => (
+          <meshPhongMaterial
+            attachArray="material"
+            side={BackSide}
+            map={item}
+            key={index}
+          />
+        ))}
+      </mesh>
+      <mesh
+        ref={mesh}
+        onClick={(e) => handleClick(e)}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+        scale={1}
+      >
+        <boxBufferGeometry attach="geometry" args={[1000, 1000, 1000]} />
 
-      {textures.map((item, index) => (
-        <meshPhongMaterial
-          attachArray="material"
+        <meshBasicMaterial
+          attach="material"
           side={BackSide}
-          map={item}
-          key={index}
+          opacity={0}
+          transparent
+          visible={false}
         />
-      ))}
 
-      {hotspots.map((hotspot, index) => (
-        <PlaneFixed
-          hotspot={hotspot}
-          setShowBoxIndex={props.setShowBoxIndex}
-          key={index}
-        />
-      ))}
+        {hotspots.map((hotspot, index) => (
+          <PlaneFixed
+            hotspot={hotspot}
+            setShowBoxIndex={props.setShowBoxIndex}
+            key={index}
+          />
+        ))}
 
-      <PlaneMove />
-    </mesh>
+        <PlaneMove />
+      </mesh>
+    </>
   );
 }
 

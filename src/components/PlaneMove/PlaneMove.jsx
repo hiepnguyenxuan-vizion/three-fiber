@@ -10,7 +10,7 @@ function PlaneMove(props) {
   const pointer = new THREE.Vector2();
   const { camera, raycaster, scene, size } = useThree();
   const stayPosition = new THREE.Vector3(0, -500, 0);
-  let factorScale = 1;
+  let factorScale;
   let circlePointerMove = {};
   let isResponsive = useRef(false);
 
@@ -24,66 +24,42 @@ function PlaneMove(props) {
     const intersects = raycaster.intersectObjects(scene.children);
 
     circlePointerMove = {
-      x: intersects[0].point.x,
-      y: intersects[0].point.y,
-      z: intersects[0].point.z,
+      x: intersects[0]?.point.x,
+      y: intersects[0]?.point.y,
+      z: intersects[0]?.point.z,
     };
 
-    // console.log(circlePointerMove);
-
-    if (isResponsive.current) return;
-    if (plane.current && circlePointerMove.z >= 480) {
+    if (isResponsive.current || !plane.current) return;
+    if (circlePointerMove.y >= -100) {
       plane.current.position.set(
         circlePointerMove.x,
-        circlePointerMove.y,
-        circlePointerMove.z - 50
-      );
-      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
-      plane.current.scale.set(factorScale, factorScale, factorScale);
-      plane.current.rotation.set(-Math.PI / 2, 0, 0);
-    } else if (plane.current && circlePointerMove.z <= -480) {
-      plane.current.position.set(
-        circlePointerMove.x,
-        circlePointerMove.y,
-        circlePointerMove.z + 50
-      );
-      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
-      plane.current.scale.set(factorScale, factorScale, factorScale);
-      plane.current.rotation.set(-Math.PI / 2, 0, 0);
-    } else if (plane.current && circlePointerMove.x <= -480) {
-      plane.current.position.set(
-        circlePointerMove.x + 50,
         circlePointerMove.y,
         circlePointerMove.z
       );
-      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      factorScale = 500 / stayPosition.distanceTo(plane.current.position);
+      factorScale = factorScale * factorScale * 1.1;
       plane.current.scale.set(factorScale, factorScale, factorScale);
-      plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (plane.current && circlePointerMove.x >= 480) {
+    } else if (
+      circlePointerMove.z >= 500 ||
+      circlePointerMove.z <= -500 ||
+      circlePointerMove.x <= -500 ||
+      circlePointerMove.x >= 500
+    ) {
       plane.current.position.set(
-        circlePointerMove.x - 50,
+        circlePointerMove.x,
         circlePointerMove.y,
         circlePointerMove.z
       );
-      factorScale = 400 / stayPosition.distanceTo(plane.current.position);
+      factorScale = 500 / stayPosition.distanceTo(plane.current.position);
+      factorScale = factorScale * factorScale * 1.1;
       plane.current.scale.set(factorScale, factorScale, factorScale);
-      plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (plane.current && circlePointerMove.y <= -480) {
+    } else if (circlePointerMove.y <= -500) {
       plane.current.position.set(
         circlePointerMove.x,
-        circlePointerMove.y + 1,
+        circlePointerMove.y,
         circlePointerMove.z
       );
       plane.current.scale.set(1, 1, 1);
-      plane.current.rotation.set(Math.PI / 2, 0, 0);
-    } else if (plane.current && circlePointerMove.y >= 480) {
-      plane.current.position.set(
-        circlePointerMove.x,
-        circlePointerMove.y - 1,
-        circlePointerMove.z
-      );
-      plane.current.scale.set(1, 1, 1);
-      plane.current.rotation.set(Math.PI / 2, 0, 0);
     }
   }
 
