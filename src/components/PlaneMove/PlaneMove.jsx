@@ -29,6 +29,8 @@ function PlaneMove(props) {
       z: intersects[0]?.point.z,
     };
 
+    // console.log(circlePointerMove);
+
     if (isResponsive.current || !plane.current) return;
     if (circlePointerMove.y >= -100) {
       plane.current.position.set(
