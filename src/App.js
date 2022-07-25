@@ -7,7 +7,7 @@ import "./App.css";
 
 function App() {
   const [showBoxIndex, setShowBoxIndex] = useState(1);
-
+  
   return (
     <div className="App">
       <Canvas className="canvas">

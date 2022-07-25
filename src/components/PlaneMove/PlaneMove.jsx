@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef } from "react";
-import { DoubleSide } from "three";
+import { DoubleSide, Vector2, Vector3 } from "three";
 import { useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import * as THREE from "three";
@@ -9,7 +9,7 @@ function PlaneMove(props) {
   const plane = useRef();
   const pointer = new THREE.Vector2();
   const { camera, raycaster, scene, size } = useThree();
-  const stayPosition = new THREE.Vector3(0, -500, 0);
+  const stayPosition = new Vector3(0, -500, 0);
   let factorScale;
   let circlePointerMove = {};
   let isResponsive = useRef(false);
@@ -28,8 +28,6 @@ function PlaneMove(props) {
       y: intersects[0]?.point.y,
       z: intersects[0]?.point.z,
     };
-
-    // console.log(circlePointerMove);
 
     if (isResponsive.current || !plane.current) return;
     if (circlePointerMove.y >= -100) {
