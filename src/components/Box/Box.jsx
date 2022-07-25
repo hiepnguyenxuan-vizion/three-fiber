@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BackSide, Vector2, Vector3 } from "three";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
@@ -7,6 +7,7 @@ import PlaneFixed from "../PlaneFixed/PlaneFixed";
 import PlaneMove from "../PlaneMove/PlaneMove";
 import { degToRad } from "three/src/math/MathUtils";
 import * as THREE from "three";
+import { useSpring, animated, config, useTransition } from "react-spring/three";
 
 function Box(props) {
   const { images, hotspots } = props.data;
@@ -150,23 +151,38 @@ function Box(props) {
     };
   }, []);
 
+  const mainMesh = useRef();
+  const [show, set] = useState(true);
+  const transitions = useTransition(show, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+    reverse: show,
+    delay: 200,
+    config: config.molasses,
+    onRest: () => set(!show),
+  });
+
   return (
     <>
       <PerspectiveCamera />
       <OrbitControls ref={controlsRef} enableZoom={false} enableRotate={true} />
-      <mesh>
-        <boxBufferGeometry attach="geometry" args={[1100, 1100, 1100]} />
 
-        {textures.map((item, index) => (
-          <meshPhongMaterial
-            attachArray="material"
-            side={BackSide}
-            map={item}
-            key={index}
-            opacity={1}
-          />
-        ))}
-      </mesh>
+      {transitions((show) => {
+        <animated.mesh ref={mainMesh}>
+          <boxBufferGeometry attach="geometry" args={[1100, 1100, 1100]} />
+
+          {textures.map((item, index) => (
+            <meshPhongMaterial
+              attachArray="material"
+              side={BackSide}
+              map={item}
+              key={index}
+            />
+          ))}
+        </animated.mesh>;
+      })}
+
       <mesh
         ref={mesh}
         onClick={(e) => handleClick(e)}
