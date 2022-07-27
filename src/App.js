@@ -1,23 +1,17 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Box from "./components/Box/Box";
-import fakeData from "./assets/fakeData/data";
 
 import "./App.css";
 
 function App() {
-  const [showBoxIndex, setShowBoxIndex] = useState(1);
-  
   return (
     <div className="App">
       <Canvas className="canvas">
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.8} />
 
         <Suspense fallback={null}>
-          <Box
-            data={fakeData[showBoxIndex - 1]}
-            setShowBoxIndex={setShowBoxIndex}
-          />
+          <Box />
         </Suspense>
       </Canvas>
     </div>

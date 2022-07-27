@@ -1,25 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { createRef, useEffect, useRef, useState } from "react";
 import { BackSide, Vector2, Vector3 } from "three";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import PlaneFixed from "../PlaneFixed/PlaneFixed";
 import PlaneMove from "../PlaneMove/PlaneMove";
 import { degToRad } from "three/src/math/MathUtils";
 import * as THREE from "three";
-import { useSpring, animated, config, useTransition } from "react-spring/three";
+import fakeData, { TexturesLoader } from "../../assets/fakeData/data";
+
+import gsap from "gsap";
 
 function Box(props) {
-  const { images, hotspots } = props.data;
+  const [showBoxIndex, setShowBoxIndex] = useState(1);
   const { camera, raycaster, scene } = useThree();
   const pointerCenter = new Vector2(0, 0);
   const mesh = useRef();
+  const arrLength = fakeData.length;
+  const [mainMeshs, setMainMeshs] = useState([]);
   const controlsRef = useRef();
-  const textures = useLoader(TextureLoader, images);
   let pointerMove = useRef(false);
   let activeRotation = useRef();
   let pointerUpArrow = useRef();
   let vectorsArr = [];
+  let hotspots = fakeData[showBoxIndex - 1].hotspots;
 
   for (let item of hotspots) {
     const vector = new Vector3(
@@ -28,6 +31,10 @@ function Box(props) {
       item.hotspot[2]
     );
     vectorsArr.push(vector);
+  }
+
+  for (let item of fakeData) {
+    item.textures = TexturesLoader(item.images);
   }
 
   const handleClick = (e) => {
@@ -50,8 +57,10 @@ function Box(props) {
       }
     }
 
-    props.setShowBoxIndex(hotspots[indexMove].boxID);
+    // handleFadeOut(hotspots[indexMove].boxID);
+    setShowBoxIndex(hotspots[indexMove].boxID);
     activeRotation.current = hotspots[indexMove].defaultRotation;
+    handleFadeIn(hotspots[indexMove].boxID);
 
     handleCameraRotation(
       activeRotation.current[0],
@@ -79,7 +88,7 @@ function Box(props) {
       }
     }
 
-    props.setShowBoxIndex(hotspots[indexMove].boxID);
+    setShowBoxIndex(hotspots[indexMove].boxID);
     activeRotation.current = hotspots[indexMove].defaultRotation;
 
     handleCameraRotation(
@@ -121,6 +130,50 @@ function Box(props) {
   });
 
   useEffect(() => {
+    setMainMeshs((elRefs) =>
+      Array(arrLength)
+        .fill()
+        .map((_, i) => elRefs[i] || createRef())
+    );
+  }, [arrLength]);
+
+  const handleFadeOut = (boxID) => {
+    // console.log(boxID);
+    for (let item of mainMeshs[boxID - 1]?.current?.material) {
+      item.visible = false;
+    }
+    const materials = mainMeshs[boxID - 1]?.current?.material;
+
+    gsap.from(materials, {
+      opacity: 1,
+      duration: 5,
+    });
+
+    gsap.to(materials, {
+      opacity: 0.5,
+      duration: 5,
+    });
+  };
+
+  const handleFadeIn = (boxID) => {
+    // console.log(boxID);
+    for (let item of mainMeshs[boxID - 1]?.current?.material) {
+      item.visible = true;
+    }
+    const materials = mainMeshs[boxID - 1]?.current?.material;
+
+    gsap.from(materials, {
+      opacity: 0.6,
+      duration: 1.5,
+    });
+
+    gsap.to(materials, {
+      opacity: 1,
+      duration: 1.5,
+    });
+  };
+
+  useEffect(() => {
     let timer = 0;
     let mouseDown;
     const handleMouseDown = (e) => {
@@ -151,37 +204,27 @@ function Box(props) {
     };
   }, []);
 
-  const mainMesh = useRef();
-  const [show, set] = useState(true);
-  const transitions = useTransition(show, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    reverse: show,
-    delay: 200,
-    config: config.molasses,
-    onRest: () => set(!show),
-  });
-
   return (
     <>
       <PerspectiveCamera />
       <OrbitControls ref={controlsRef} enableZoom={false} enableRotate={true} />
 
-      {transitions((show) => {
-        <animated.mesh ref={mainMesh}>
+      {fakeData.map((box, boxIndex) => (
+        <mesh ref={mainMeshs[boxIndex]} key={boxIndex} name={box.name}>
           <boxBufferGeometry attach="geometry" args={[1100, 1100, 1100]} />
 
-          {textures.map((item, index) => (
+          {box.textures?.map((item, textureIndex) => (
             <meshPhongMaterial
               attachArray="material"
               side={BackSide}
               map={item}
-              key={index}
+              // opacity={showBoxIndex - 1 === boxIndex ? 1 : 0}
+              visible={showBoxIndex - 1 === boxIndex ? true : false}
+              key={textureIndex}
             />
           ))}
-        </animated.mesh>;
-      })}
+        </mesh>
+      ))}
 
       <mesh
         ref={mesh}
@@ -203,7 +246,7 @@ function Box(props) {
         {hotspots.map((hotspot, index) => (
           <PlaneFixed
             hotspot={hotspot}
-            setShowBoxIndex={props.setShowBoxIndex}
+            setShowBoxIndex={setShowBoxIndex}
             key={index}
           />
         ))}

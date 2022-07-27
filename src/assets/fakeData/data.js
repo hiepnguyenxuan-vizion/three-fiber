@@ -20,6 +20,12 @@ import img17 from "../../images/box3/pz_3.jpg";
 import img18 from "../../images/box3/nz_3.jpg";
 
 import { degToRad } from "three/src/math/MathUtils";
+import { useLoader } from "@react-three/fiber";
+import { TextureLoader } from "three";
+
+export const TexturesLoader = (images) => {
+  return useLoader(TextureLoader, images);
+};
 
 const fakeData = [
   {
